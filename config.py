@@ -10,8 +10,15 @@ class TgBot:
 
 
 @dataclass
+class DatabaseConfig:
+    url: str | None = None  # PostgreSQL connection string (DATABASE_URL)
+    path: str = "database/database.db"  # SQLite path (если DATABASE_URL не указан)
+
+
+@dataclass
 class Config:
     bot: TgBot
+    database: DatabaseConfig
 
 
 # Инициализация Env
@@ -25,5 +32,9 @@ config = Config(
         token=env('BOT_TOKEN'),
         owner_id=env.int('OWNER_ID'),
         admin_ids=env.list('ADMIN_IDS', subcast=int, default=[])
+    ),
+    database=DatabaseConfig(
+        url=env('DATABASE_URL', default=None),
+        path=env('DATABASE_PATH', default="database/database.db")
     ),
 )
