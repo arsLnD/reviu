@@ -146,7 +146,7 @@ async def start_review(call: CallbackQuery, state: FSMContext):
         full_name=user.full_name,
     )
     await call.message.answer(
-        "Оцените ваш опыт от 1 до 5 (где 5 — отлично):",
+        "Оцените качество услуг нашего автосервиса по шкале от 1 до 5, где 5 — безупречный результат.",
         reply_markup=rating_keyboard(),
     )
     await call.answer()
@@ -248,7 +248,7 @@ async def finalize_review(message: Message, state: FSMContext):
     )
 
     await state.clear()
-    await message.answer("Спасибо! Ваш отзыв отправлен модераторам и появится в списке после проверки.")
+    await message.answer("Спасибо за обратную связь будем рады вас видеть снова.")
 
     recipients = set(config.bot.admin_ids + [config.bot.owner_id])
     recipients.discard(user_id)

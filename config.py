@@ -13,6 +13,9 @@ class TgBot:
 class DatabaseConfig:
     url: str | None = None  # PostgreSQL connection string (DATABASE_URL)
     path: str = "database/database.db"  # SQLite path (если DATABASE_URL не указан)
+    backup_dir: str = "backups"  # Директория для бэкапов SQLite
+    backup_interval_hours: int = 24  # Интервал между бэкапами в часах
+    backup_keep_count: int = 10  # Количество бэкапов для хранения
 
 
 @dataclass
@@ -35,6 +38,9 @@ config = Config(
     ),
     database=DatabaseConfig(
         url=env('DATABASE_URL', default=None),
-        path=env('DATABASE_PATH', default="database/database.db")
+        path=env('DATABASE_PATH', default="database/database.db"),
+        backup_dir=env('BACKUP_DIR', default="backups"),
+        backup_interval_hours=env.int('BACKUP_INTERVAL_HOURS', default=24),
+        backup_keep_count=env.int('BACKUP_KEEP_COUNT', default=10)
     ),
 )

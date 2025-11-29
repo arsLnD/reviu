@@ -23,8 +23,9 @@ async def main():
         logger.info(f"Using SQLite database: {db.db_path}")
         # Запускаем периодические бэкапы для SQLite (только если не PostgreSQL)
         from utils.backup import periodic_backup
-        backup_task = asyncio.create_task(periodic_backup(db.db_path, interval_hours=24))
-        logger.info("SQLite backup system started (every 24 hours)")
+        backup_task = asyncio.create_task(periodic_backup(db.db_path))
+        logger.info(f"SQLite backup system started (every {config.database.backup_interval_hours} hours)")
+        logger.info(f"Backups will be saved to: {config.database.backup_dir}")
 
     bot = Bot(config.bot.token)
     dp = Dispatcher()

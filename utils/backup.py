@@ -8,15 +8,16 @@ import asyncio
 from datetime import datetime
 from pathlib import Path
 from loguru import logger
+from config import config
 
 
-async def backup_sqlite_database(db_path: str, backup_dir: str = "backups") -> str | None:
+async def backup_sqlite_database(db_path: str, backup_dir: str | None = None) -> str | None:
     """
     Создает бэкап SQLite базы данных.
     
     Args:
         db_path: Путь к файлу базы данных
-        backup_dir: Директория для хранения бэкапов
+        backup_dir: Директория для хранения бэкапов (если None, берется из config)
         
     Returns:
         Путь к созданному бэкапу или None в случае ошибки
@@ -24,6 +25,10 @@ async def backup_sqlite_database(db_path: str, backup_dir: str = "backups") -> s
     if not os.path.exists(db_path):
         logger.warning(f"База данных не найдена: {db_path}")
         return None
+    
+    # Используем путь из config, если не указан
+    if backup_dir is None:
+        backup_dir = config.database.backup_dir
     
     # Создаем директорию для бэкапов
     os.makedirs(backup_dir, exist_ok=True)
@@ -38,8 +43,8 @@ async def backup_sqlite_database(db_path: str, backup_dir: str = "backups") -> s
         shutil.copy2(db_path, backup_path)
         logger.info(f"Бэкап создан: {backup_path}")
         
-        # Удаляем старые бэкапы (оставляем только последние 10)
-        cleanup_old_backups(backup_dir, keep_count=10)
+        # Удаляем старые бэкапы
+        cleanup_old_backups(backup_dir, keep_count=config.database.backup_keep_count)
         
         return backup_path
     except Exception as e:
@@ -77,14 +82,17 @@ def cleanup_old_backups(backup_dir: str, keep_count: int = 10) -> None:
         logger.error(f"Ошибка при очистке старых бэкапов: {e}")
 
 
-async def periodic_backup(db_path: str, interval_hours: int = 24) -> None:
+async def periodic_backup(db_path: str, interval_hours: int | None = None) -> None:
     """
     Периодическое создание бэкапов.
     
     Args:
         db_path: Путь к файлу базы данных
-        interval_hours: Интервал между бэкапами в часах
+        interval_hours: Интервал между бэкапами в часах (если None, берется из config)
     """
+    if interval_hours is None:
+        interval_hours = config.database.backup_interval_hours
+    
     while True:
         try:
             await asyncio.sleep(interval_hours * 3600)  # Конвертируем часы в секунды
